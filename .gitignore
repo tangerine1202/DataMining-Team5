@@ -3,5 +3,4 @@
 checkpoints/
 test_trainer/
 
-data/*
-!data/train.tsv
+data/Batch_answers*
