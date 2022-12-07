@@ -2,6 +2,7 @@
 
 
 Competition Link: [TBrain AI 實戰吧](https://tbrain.trendmicro.com.tw/Competitions/Details/26)
+
 Model List: [Huggingface Pre-trained Model List](https://huggingface.co/transformers/v3.3.1/pretrained_models.html)
 
 ---
@@ -16,7 +17,7 @@ Model List: [Huggingface Pre-trained Model List](https://huggingface.co/transfor
 3. `evaluate.py`: (optional) Evaluation on training data to see the results.
 4. `try.py`: (optional) See the lcs results on training data.
 
-## Submission
+## Submission Steps
 0. Download submission data in folder `data`
 1. `preprocess-sub.py`: Data preprocessing for submission data. (Same tokenizer as training model)
 2. `predict-sub.py`: Generate model prediction on submission dataset.
