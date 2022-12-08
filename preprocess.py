@@ -10,8 +10,8 @@ from transformers import AutoModelForTokenClassification, TrainingArguments, Tra
 from transformers import DataCollatorForTokenClassification
 
 data_path = "data/Batch_answers - train_data (no-blank).csv"
-goal_path = "data/tc-bert-base-dataset-"
-model_name = "bert-base-uncased"
+goal_path = "data/tc-roberta-dataset-"
+model_name = "roberta-base"
 
 """
 """
@@ -32,6 +32,14 @@ df = df.drop_duplicates()
 print(df['s'].value_counts())
 print('# of distinct data:\t', len(df['id'].unique()))
 print('# of data:\t', len(df))
+
+
+### changes for roberta
+df['q'] = df['q'].apply(lambda x : "S " + x)
+df['r'] = df['r'].apply(lambda x : "S " + x)
+df["q'"] = df["q'"].apply(lambda x : "S " + x)
+df["r'"] = df["r'"].apply(lambda x : "S " + x)
+###
 
 def get_tokenized_text(data, category):
   input_ids = []
@@ -54,10 +62,11 @@ print(df.shape)
 
 no_one_id = []
 
+### changes for roberta
 def make_labels_sep(tokens, tags, ind):
-    tokens = tokens[1:-1]
-    tags = tags[1:-1]
-    ans = [-100]  # [CLS]
+    tokens = tokens[2:-1]
+    tags = tags[2:-1]
+    ans = [-100, 0]  # [CLS]
     tid = 0
     tlen, alen = len(tokens), len(tags)
 
@@ -82,12 +91,27 @@ def make_labels_sep(tokens, tags, ind):
         tid += 1
     ans.append(-100)
     if 1 not in ans:
+      ans = [-100, 0]
+      # use soft version labeling
+      tid, aid = 0,0
+      while tid < tlen:
+        if aid < alen and tags[aid] == 1437:
+          aid += 1
+        if aid < alen and tokens[tid] == tags[aid]:
+          ans.append(1)
+          aid += 1
+        else:
+          ans.append(0)
+        tid += 1
+      ans.append(-100)
+      if aid != alen:
         no_one_id.append(ind)
     return ans
+### 
 
 df["q_labels"] = df[["q_input_ids", "q'_input_ids", "index"]].apply(lambda x : make_labels_sep(x["q_input_ids"], x["q'_input_ids"], x["index"]), axis=1)
 df["r_labels"] = df[["r_input_ids", "r'_input_ids", "index"]].apply(lambda x : make_labels_sep(x["r_input_ids"], x["r'_input_ids"], x["index"]), axis=1)
-
+print(no_one_id)
 df = df.drop(no_one_id)
 print("\nMake Labels and Clean")
 print(df.shape)
